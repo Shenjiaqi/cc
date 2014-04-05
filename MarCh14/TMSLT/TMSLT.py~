@@ -1,0 +1,3 @@
+T = input()
+for i in xrange(T):
+    n, a, b, c, d = map( int, raw_input().split() )

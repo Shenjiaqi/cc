@@ -1,0 +1,5 @@
+print 1
+n = 100000
+print n
+for i in xrange(100000):
+    print( 
