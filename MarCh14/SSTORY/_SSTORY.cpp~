@@ -6,8 +6,6 @@
 #include <fstream>
 #include <cassert>
 #include <set>
-#include <unordered_set>
-#include <tuple>
 #include <queue>
 #include <iostream>
 #include <utility>
@@ -33,13 +31,9 @@ typedef pair<double,double> ppd;
 #define FR(a,b) for(typeof(b.begin()) a=b.begin();a!=b.end();++a)
 int main()
 {
-  int l[2] = { 10000 , 25 };
-  srand( time( NULL ) );
-  for( int j = 0 ; j < 2; ++j )
-    {
-      for( int i = 0 ; i < l[j]; ++i )
-	cout << (char)( ( rand() % ( 'r' - 'a' ) ) + 'a' );
-      cout << endl;
-    }
+
+#ifdef LOCAL_DEFINE
+  cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC << " s.\n";
+#endif
   return 0;
 }

@@ -1,54 +1,133 @@
+#include <cstdio>
+#include <cstring>
 #include <algorithm>
 #include <string>
-#include <vector>
-#include <cmath>
-#include <map>
-#include <fstream>
-#include <cassert>
-#include <set>
-#include <unordered_set>
-#include <tuple>
-#include <queue>
 #include <iostream>
-#include <utility>
-#include <stack>
-#include <complex>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <list>
-#include <functional>
-#include <cctype>
+#define pc putchar_unlocked
 using namespace std;
-typedef long double ld;
-typedef long long ll;
-typedef pair<int,int> ppi;
-typedef pair<ll,ll> ppl;
-typedef pair<double,double> ppd;
-#define PB push_back
-#define MP make_pair
-#define FIR first
-#define SEC second
-#define FOR(a,b,c) for(int a=(b);a<(c);++a)
-#define FR(a,b) for(typeof(b.begin()) a=b.begin();a!=b.end();++a)
 
-struct hV
+const int maxN = 250500;
+const int maxState = maxN << 1;
+
+int ii=-1;
+
+struct State
 {
-  pair<ll,ll> val;
-  bool operator==(const hV & other) const
-  {
-    return val.first == other.val.first &&
-      val.second == other.val.second;
-  }
+  State *go[26], *suffix;
+  int depth, id;
+  long long cnt;
 };
-struct myhash {
-  size_t operator()(const hV& x) const
-  {
-    return hash<ll>()( x.val.first + x.val.second);
-  }
-};
+State pool[maxState], *point, *root, *sink;
+int size;
+
+State *newState(int dep)
+{
+  point->id = size++;
+  point->depth = dep;
+  return point++;
+}
+
+void init()
+{
+  point = pool;
+  size = 0;
+  root = sink = newState(0);
+}
+
+void insert(int a)
+{
+  State *p = newState(sink->depth+1);
+  State *cur = sink, *sufState;
+  while (cur && !cur->go[a])
+    {
+      cur->go[a] = p;
+      cur = cur->suffix;
+    }
+  if (!cur)
+    sufState = root;
+  else
+    {
+      State *q = cur->go[a];
+      if (q->depth == cur->depth + 1)
+	sufState = q;
+      else
+        {
+	  State *r = newState(cur->depth+1);
+	  memcpy(r->go, q->go, sizeof(q->go));
+	  r->suffix = q->suffix;
+	  q->suffix = r;
+	  sufState = r;
+	  while (cur && cur->go[a] == q)
+            {
+	      cur->go[a] = r;
+	      cur = cur->suffix;
+            }
+        }
+    }
+  p->suffix = sufState;
+  sink = p;
+}
+
+int solve(char buf[])
+{
+  int len = strlen(buf);
+  int tmp = 0, ans = 0;
+  State *cur = root;
+  for (int i = 0; i < len; i++)
+    {
+      if (cur->go[buf[i]-'a'])
+        {
+	  tmp++;
+	  cur = cur->go[buf[i]-'a'];
+        }
+      else
+        {
+	  while (cur && !cur->go[buf[i]-'a'])
+	    cur = cur->suffix;
+	  if (!cur)
+            {
+	      cur = root;
+	      tmp = 0;
+            }
+	  else
+            {
+	      tmp = cur->depth + 1;
+	      cur = cur->go[buf[i]-'a'];
+            }
+        }
+      if(ans<tmp)
+        {
+	  ans = tmp;
+	  ii = i-tmp+1;
+        }
+
+    }
+  return ans;
+}
+
+char ch[maxN];
+
 int main()
 {
-  unordered_set<hV,myhash> has;
+  scanf("%s", ch);
+  init();
+  int len = strlen(ch);
+  for (int i = 0; i < len; i++)
+    insert(ch[i]-'a');
+  scanf("%s", ch);
+
+  int ans = solve(ch);
+
+  if(ans == 0)
+    {
+      printf("0\n");
+    }
+  else
+    {
+      for(int i=ii,j=0;j<ans;j++,i++)
+	pc(ch[i]);
+      pc('\n');
+      printf("%d\n", ans);
+    }
   return 0;
 }
