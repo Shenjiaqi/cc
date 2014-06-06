@@ -1,0 +1,5 @@
+#!/bin/bash
+python gen.py > in
+#g++ chk.cpp && ./a.out < in > o1
+g++ -O2 FUNAGP.cpp && time ./a.out < in > o2
+#diff o1 o2
