@@ -1,0 +1,108 @@
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <fstream>
+#include <cassert>
+#include <set>
+#include <queue>
+#include <iostream>
+#include <utility>
+#include <stack>
+#include <complex>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <list>
+#include <functional>
+#include <cctype>
+//#include <unordered_set>
+//#include <unordered_map>
+using namespace std;
+typedef long double ld;
+typedef long long ll;
+typedef pair<int,int> ppi;
+typedef pair<ll,ll> ppl;
+typedef pair<double,double> ppd;
+#define PB push_back
+#define MP make_pair
+#define FIR first
+#define SEC second
+#define FOR(a,b,c) for(int a=(b);a<(c);++a)
+#define FR(a,b) for(typeof(b.begin()) a=b.begin();a!=b.end();++a)
+const int N = 17;
+const int M = 17;
+int ans;
+char res[N][M], p[N][M];
+int cnt[4];
+int cal( int n, int m, in use, int k, const int sum)
+{
+  for( int t = 0 ; t < 107; ++t )
+    {
+      for( int i = 0; i < n ; ++i )
+	for( int j = 0 ; j < m ; ++j )
+	  {
+	    p[i][j] = rand() % use;
+	  }
+      for( int tt = 0 ; tt < n * m * (use - 1); ++tt )
+	{
+	  int num = sum - calSame( n, m );
+	  if( abs( num - k ) < abs( ans - k ) )
+	    {
+	      ans = num;
+	      memcpy( res, p, sizeof(res) );
+	    }
+	  if( num > k )
+	    {
+	      for( int i = 0 ; i < use; ++i )
+		cnt[i] = 0;
+	      for( int i = 0 ; i < n ; ++i )
+		for( int j = 0 ; j  < m ; ++j )
+		  {
+		    ++cnt[ p[i][j] ];
+		  }
+	      int chg = 0;
+	      for( int chg = 0, j = n * m; chg < use;j -= cnt[chg], ++chg )
+		if( ( rand() % j ) > cnt[i] )
+		  break;
+	      for( int i = 0 ; i < n ; ++i )
+		for( int j = 0 ; j < m ; ++j )
+		  if( p[i][j] == chg && ( rand() % cnt[chg] ) == 0 )
+		    {
+		      
+		    }
+	    }
+	}
+    }
+}
+int main()
+{
+  int T;
+  scanf("%d", &T);
+  for( int t = 0 ; t < T ; ++t )
+    {
+      if( t )
+	printf("\n");
+      int n, m, k;
+      scanf("%d%d", &n, &m, &k);
+      int sum(0);
+      for( int i = 0 ; i < n ; ++i )
+	for( int j = 0 ; j < m ; ++j )
+	  sum += ( n - i ) * ( m - j );
+      sum = ( sum * ( sum - 1 ) ) / 2 + sum;
+      ans = n * m * n * m + 7;
+      for( int i = 1 ; i < 4 ; ++i )
+	{
+	  num = cal( n, m, i, k, sum );
+	}
+      for( int i = 0 ; i < n ; ++i )
+	{
+	  if( i )
+	    printf("\n");
+	  for( int j = 0 ; j < m ; ++j )
+	    printf("%c", res[i][j]);
+	}
+    }
+  return 0;
+}

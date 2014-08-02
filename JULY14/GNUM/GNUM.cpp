@@ -1,0 +1,240 @@
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <fstream>
+#include <cassert>
+#include <set>
+#include <queue>
+#include <iostream>
+#include <utility>
+#include <stack>
+#include <complex>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <list>
+#include <functional>
+#include <cctype>
+#include <unordered_set>
+#include <unordered_map>
+using namespace std;
+typedef long double ld;
+typedef long long ll;
+typedef pair<int,int> ppi;
+typedef pair<ll,ll> ppl;
+typedef pair<double,double> ppd;
+#define PB push_back
+#define MP make_pair
+#define FIR first
+#define SEC second
+#define FOR(a,b,c) for(int a=(b);a<(c);++a)
+#define FR(a,b) for(typeof(b.begin()) a=b.begin();a!=b.end();++a)
+const int N = 400;
+int p[2][N];
+bool visP[100007];
+vector<pair<ll,int> > q;
+vector<int> s, c;
+vector<int> vis;
+vector<int> lev;
+int visId;
+int S, T;
+ll pk( ll a, ll b)
+{
+  return ( a << 30 ) | b;
+}
+void dpk( ll v, int &a, int &b)
+{
+  a = v >> 30;
+  b = v & ( ( 1LL << 30 ) - 1 );
+}
+void add( int f, int t, int val)
+{
+  // cout << f << ' ' << t << ' ' << val << ' ' << s[f] << endl;
+  q.push_back( make_pair( pk( t, val), s[f]) );
+  s[f] = q.size() - 1;
+  q.push_back( make_pair( pk( f, 0), s[t] ));
+  s[t] = q.size() - 1;
+}
+bool bfs()
+{
+  c = s;
+  ++visId;
+  vis[S] = visId;
+  queue<int> que;
+  que.push(S);
+  lev[S] = 1;
+  for( ; !que.empty(); que.pop() )
+    {
+      int v = que.front();
+      for( int i = c[v] ; i ; i = q[i].second )
+	{
+	  int to, f;
+	  dpk( q[i].first, to, f);
+	  if( vis[to] != visId && f > 0 )
+	    {
+	      vis[to] = visId;
+	      lev[to] = lev[v] + 1;
+	      que.push(to);
+	    }
+	}
+    }
+  // cout << vis[T] << ' ' << lev[T] << endl;;
+  return vis[T] == visId;
+}
+int dfs( int v, int f )
+{
+  // if( v == S )
+  //   cout << endl;
+  // cout << v << ' ' << f << "     " ;
+  if( v == T )
+    return f;
+  int r = f;
+  int i = c[v];
+  for( ; i; i = q[i].second )
+    {
+      int to, val;
+      dpk( q[i].first, to, val);
+      if( lev[v] + 1 == lev[to] && val > 0 )
+	{
+	  int tmp = dfs( to, min( f, val) );
+	  f -= tmp;
+	  q[i].first -= tmp;
+	  q[ i + ( i & 1 ? 1 : - 1 ) ].first += tmp;
+	  if( f == 0 )
+	    break;
+	}
+    }
+  c[v] = i;
+  return r - f;
+}
+int mf( int n)
+{
+  int r(0);
+  for( ; bfs(); )
+    {
+      for( ; ; )
+	{
+	  // cout << "MAXV" << maxV << endl;
+	  int tmp = dfs(S, n * n);
+	  if( tmp == 0 )
+	    break;
+	  r += tmp;
+	}
+    }
+  return r;
+}
+int main()
+{
+  int te;
+  scanf("%d", &te);
+  vector<int> prime;
+  for( ll i = 2; i * i < 1e9 + 7; ++i )
+    if( !visP[i] )
+      {
+	prime.push_back(i);
+	for( ll j = i * i; j < 1e5 + 7; j += i )
+	  visP[j] = true;
+      }
+  for( int t = 0 ; t < te ; ++t )
+    {
+      int n;
+      scanf("%d", &n);
+      for( int i = 0 ; i < 2 ; ++i )
+	for( int j = 0 ; j < n ; ++j )
+	  scanf("%d", &p[i][j] );
+      unordered_set<int> mid;
+      unordered_map<int,int> lft, rht;
+      for( int i = 0 ; i < n ; ++i )
+	{
+	  int tmp = p[0][i];
+	  vector<int> lst;
+	  for( int j = 0; j < prime.size() && tmp >= prime[j]; ++j )
+	    if( ( tmp % prime[j] ) == 0 )
+	      {
+		lst.push_back( prime[j] );
+		for( ; ( tmp % prime[j] ) == 0; )
+		  tmp /= prime[j];
+	      }
+	  if( tmp > 1 )
+	    lst.push_back( tmp );
+	  if( !lst.empty() )
+	    {
+	      for( auto k : lst )
+		mid.insert( k );
+	      for( int j = 0 ; j < n ; ++j )
+		if( p[0][i] != p[1][j] )
+		  {
+		    vector<int> llst;
+		    int val = 1;
+		    for( auto k : lst )
+		      if( ( p[1][j] % k ) == 0 )
+			{
+			  llst.push_back(k);
+			  val *= k;
+			}
+		      else if( k > p[1][j] )
+			break;
+		    if( val > 1 )
+		      {
+			if( p[0][i] < p[1][j] )
+			  {
+			    ++lft[val];
+			  }
+			else
+			  {
+			    ++rht[val];
+			  }
+		      }
+		  }
+	    }
+	}
+      int cnt = 0;
+      S = ++cnt;
+      T = ++cnt;
+      vector<ppi> tmp;
+      for( auto i : mid )
+	{
+	  tmp.push_back( ppi( i, ++cnt ) );
+	  // cout << "!" << i << ' ' << cnt << endl;
+	}
+      s.resize( mid.size() + lft.size() + rht.size() + 2 + 7 );
+      mid.clear();
+      sort( tmp.begin(), tmp.end() );
+      q.resize(1);
+      fill( s.begin(), s.end(), 0);
+      for( auto i : lft )
+	{
+	  add( S, ++cnt, i.second );
+	  // cout << "!!" << i.first << ' ' << cnt << ' ' << i.second << endl;
+	  int t = i.first;
+	  for( auto j : tmp )
+	    if( ( t % j.first ) == 0 )
+	      {
+		add( cnt, j.second, i.second);
+		t /= j.first;
+	      }
+	    else if( j.first > t )
+	      break;
+	}
+      for( auto i : rht )
+	{
+	  add( ++cnt, T, i.second);
+	  // cout << "!!!" << i.first << ' ' << cnt << ' ' << i.second << endl;
+	  int t = i.first;
+	  for( auto j : tmp )
+	    if( ( t % j.first ) == 0 )
+	      {
+		add( j.second, cnt, i.second );
+		t /= j.first;
+	      }
+	    else if( j.first > t )
+	      break;
+	}
+      vis.resize( cnt + 7 );
+      lev.resize( cnt + 7 );
+      printf("%d\n", mf(n) );
+    }
+  return 0;
+}
